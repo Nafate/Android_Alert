@@ -21,9 +21,12 @@ import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
-public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks ,GoogleApiClient.OnConnectionFailedListener{
+public class MainActivity extends AppCompatActivity
+        implements GoogleApiClient.ConnectionCallbacks ,GoogleApiClient.OnConnectionFailedListener, LocationListener{
 
     private final static int REQUEST_PERMISSIONS = 1001;
 
@@ -40,23 +43,37 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         btnSendLocation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(!isSendingMessage)
-                    mGoogleApiClient.connect();
+                if(mLastLocation != null &&!isSendingMessage){
+                    String message = String.format(
+                            "I'm currently here.\n\n" +
+                                    "Latitude :%.8f\n" +
+                                    "Longitude: :%.8f\n"+
+                                    "http://maps.google.com/?q=%.8f,%.8f&zoom=20",mLastLocation.getLatitude(),mLastLocation.getLongitude(),mLastLocation.getLatitude(),mLastLocation.getLongitude());
+
+//                    sendSMS("3317928713",message);
+                    sendSMS("3338415110",message);
+                }
+
             }
         });
 
-       checkPermissions();
-
+        buildGoogleApiClient();
+        checkPermissions();
     }
 
-
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (mGoogleApiClient != null && mGoogleApiClient.isConnected())
+            mGoogleApiClient.disconnect();
+    }
 
     private void checkPermissions(){
         if(ActivityCompat.checkSelfPermission(this,Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED &&
                 ActivityCompat.checkSelfPermission(this,Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED){
             ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.SEND_SMS,Manifest.permission.ACCESS_COARSE_LOCATION},REQUEST_PERMISSIONS);
         }else{
-            buildGoogleApiClient();
+            mGoogleApiClient.connect();
         }
     }
 
@@ -131,16 +148,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if(requestCode == REQUEST_PERMISSIONS){
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                buildGoogleApiClient();
+                mGoogleApiClient.connect();
             } else {
                 ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.SEND_SMS,Manifest.permission.ACCESS_COARSE_LOCATION},REQUEST_PERMISSIONS);
             }
         }
     }
 
-    /**
-     * Builds a GoogleApiClient. Uses the addApi() method to request the LocationServices API.
-     */
     protected synchronized void buildGoogleApiClient() {
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
@@ -151,19 +165,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-        mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-        if (mLastLocation != null){
-            String message = String.format(
-                    "I'm currently here.\n\n" +
-                    "Latitude :%.8f\n" +
-                    "Longitude: :%.8f\n\n"+
-                    "http://maps.google.com/?q=%.8f,%.8f&zoom=20",mLastLocation.getLatitude(),mLastLocation.getLongitude(),mLastLocation.getLatitude(),mLastLocation.getLongitude());
-
-            sendSMS("3317928713",message);
-        }else{
-            Toast.makeText(this, "No se encontro ubicación disponible", Toast.LENGTH_LONG).show();
-        }
-        mGoogleApiClient.disconnect();
+        LocationRequest locationRequest = LocationRequest.create();
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        locationRequest.setInterval(1000); // Update location every second
+        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, locationRequest, this);
     }
 
     @Override
@@ -174,5 +179,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        if (mLastLocation != null){
+            mLastLocation = location;
+        }else{
+            Toast.makeText(this, "No se encontro ubicación disponible", Toast.LENGTH_LONG).show();
+        }
     }
 }

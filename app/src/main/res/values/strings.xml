@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Alert</string>
     <string name="send_location">Enviar Ubicación</string>
+    <string name="location_message_holder">I'm currently here.\n\nLatitude :%.8f\n"Longitude: :%.8f\nhttp://maps.google.com/?q=%.8f,%.8f&amp;zoom=20</string>
 </resources>

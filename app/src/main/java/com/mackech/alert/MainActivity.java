@@ -44,16 +44,8 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onClick(View view) {
                 if(mLastLocation != null &&!isSendingMessage){
-                    String message = String.format(
-                            "I'm currently here.\n\n" +
-                                    "Latitude :%.8f\n" +
-                                    "Longitude: :%.8f\n"+
-                                    "http://maps.google.com/?q=%.8f,%.8f&zoom=20",mLastLocation.getLatitude(),mLastLocation.getLongitude(),mLastLocation.getLatitude(),mLastLocation.getLongitude());
-
-//                    sendSMS("3317928713",message);
-                    sendSMS("3338415110",message);
+                    sendSMS("3338415110", getString(R.string.location_message_holder,mLastLocation.getLatitude(),mLastLocation.getLongitude(),mLastLocation.getLatitude(),mLastLocation.getLongitude()););
                 }
-
             }
         });
 
@@ -194,8 +186,6 @@ public class MainActivity extends AppCompatActivity
     public void onLocationChanged(Location location) {
         if (mLastLocation != null){
             mLastLocation = location;
-        }else{
-            Toast.makeText(this, "No se encontro ubicación disponible", Toast.LENGTH_LONG).show();
         }
     }
 }

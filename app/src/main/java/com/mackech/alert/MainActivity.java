@@ -49,11 +49,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        mGoogleApiClient.connect();
-    }
+
 
     private void checkPermissions(){
         if(ActivityCompat.checkSelfPermission(this,Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED &&
@@ -159,9 +155,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         if (mLastLocation != null){
             String message = String.format(
                     "I'm currently here.\n\n" +
-                    "Latitude :$1%f\n" +
-                    "Longitude: :$2%f\n"+
-                    "http://maps.google.com/?q=$1%f,$2%f&zoom=20",mLastLocation.getLatitude(),mLastLocation.getLongitude());
+                    "Latitude :%.8f\n" +
+                    "Longitude: :%.8f\n\n"+
+                    "http://maps.google.com/?q=%.8f,%.8f&zoom=20",mLastLocation.getLatitude(),mLastLocation.getLongitude(),mLastLocation.getLatitude(),mLastLocation.getLongitude());
 
             sendSMS("3317928713",message);
         }else{

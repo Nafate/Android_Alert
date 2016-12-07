@@ -71,10 +71,19 @@ public class MainActivity extends AppCompatActivity
     private void checkPermissions(){
         if(ActivityCompat.checkSelfPermission(this,Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED &&
                 ActivityCompat.checkSelfPermission(this,Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED){
-            ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.SEND_SMS,Manifest.permission.ACCESS_COARSE_LOCATION},REQUEST_PERMISSIONS);
+            requestPermissions();
         }else{
             mGoogleApiClient.connect();
         }
+    }
+
+    private void requestPermissions(){
+        ActivityCompat.requestPermissions(this,
+                new String[]{
+                        Manifest.permission.SEND_SMS,
+                        Manifest.permission.ACCESS_COARSE_LOCATION,
+                        Manifest.permission.ACCESS_FINE_LOCATION},
+                REQUEST_PERMISSIONS);
     }
 
     private void sendSMS(String phoneNumber,String message){
@@ -150,7 +159,7 @@ public class MainActivity extends AppCompatActivity
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 mGoogleApiClient.connect();
             } else {
-                ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.SEND_SMS,Manifest.permission.ACCESS_COARSE_LOCATION},REQUEST_PERMISSIONS);
+                requestPermissions();
             }
         }
     }
